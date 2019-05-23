@@ -1,0 +1,7 @@
+name: Dialogues
+main: de.astride.dialogues.Dialogues
+version: @version@
+authors: [LartyHD]
+website: astride.de
+depend:
+  - DarkFrame

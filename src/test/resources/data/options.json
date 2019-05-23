@@ -1,0 +1,26 @@
+[
+  {
+    "id": "test-option",
+    "text": [
+      "Line1",
+      "Line2 a second after"
+    ],
+    "actions": {
+      "NAME (#NotSupportedBecauseTheOptionIDIsNotExisting)": "OPTION_POINTER (id)",
+      "loop": "test-option",
+      "Finish": "finish"
+    },
+    "command": "say hi ${player}"
+  },
+  {
+    "id": "finish",
+    "text": [
+      "Finished :D"
+    ],
+    "actions": {},
+    "command": "no idea"
+  },
+  {
+    "...": "..."
+  }
+]

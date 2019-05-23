@@ -73,6 +73,8 @@ dependencies {
     testCompile "com.github.nhaarman:mockito-kotlin:2.1.0"
     testCompile 'io.mockk:mockk:1.9'
 
+    compileOnly("com.github.AstrideUG.DarkBedrock:Darkness-Spigot:8ee58575b")
+
 }
 
 jar {
@@ -84,8 +86,6 @@ jar {
 processResources {
     from(sourceSets.main.resources.srcDirs) {
         filter ReplaceTokens, tokens: [version: version, group: pluginGroup, name: rootProject.name, lowerName: rootProject.name.toLowerCase()]
-//            filter ReplaceTokens, tokens: [group: group]
-//            filter ReplaceTokens, tokens: [name: name]
     }
 }
 
