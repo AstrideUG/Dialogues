@@ -1,6 +1,6 @@
 package de.astride.dialogues.data
 
-import de.astride.dialogues.services.ConfigService
+import de.astride.dialogues.functions.configService
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -22,8 +22,34 @@ import org.bukkit.entity.Player
 interface Option {
     val id: String
     val text: List<String> //with Scheduler
-    val actions: Map<String, Option> //Name, NextOption; ends dialogue if actions is empty
+    val actions: Map<String, String> //Name, NextOptionID; ends dialogue if actions is empty
     val command: String //if actions is empty run after text print
+}
+
+/**
+ * @author Lars Artmann | LartyHD
+ * Created by Lars Artmann | LartyHD on 23.05.2019 18:45.
+ * Current Version: 1.0 (23.05.2019 - 23.05.2019)
+ */
+data class DataOption(
+    override val id: String,
+    override val text: List<String> = emptyList(),
+    override val actions: Map<String, String> = emptyMap(),
+    override val command: String = ""
+) : Option
+
+/**
+ * @author Lars Artmann | LartyHD
+ * Created by Lars Artmann | LartyHD on 23.05.2019 19:25.
+ * Current Version: 1.0 (23.05.2019 - 23.05.2019)
+ */
+@Suppress("UNCHECKED_CAST")
+fun Map<String, Any?>.toOption(): Option {
+    val id = this["id"].toString()
+    val text = this["text"] as? List<String> ?: listOf()
+    val actions = this["actions"] as? Map<String, String> ?: mapOf()
+    val command = this["command"] as? String ?: ""
+    return DataOption(id, text, actions, command)
 }
 
 /**
@@ -36,7 +62,7 @@ fun Option.perform(player: Player, entityID: Int) {
     GlobalScope.launch {
         text.forEach {
             it.sendTo(player)
-            delay(ConfigService.sleepOnTextPrint)
+            delay(configService.sleepOnTextPrint)
         }
         if (actions.isEmpty()) {
             Bukkit.getConsoleSender().execute(command.replace("\${player}", player.name))
@@ -47,7 +73,7 @@ fun Option.perform(player: Player, entityID: Int) {
                 textComponent.builder()
                     .setText(key)
                     .setClickEvent(
-                        ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dialogue use option $entityID ${value.id}")
+                        ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dialogue use option $entityID $value")
                     )
                     .setHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Select a option!"))))
                     .build()
