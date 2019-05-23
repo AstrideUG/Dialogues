@@ -56,7 +56,7 @@ configurations {
 
 dependencies {
 
-    compileOnly(fileTree(libsDirName))
+    compileOnly("com.github.AstrideUG.DarkBedrock:Darkness-Spigot:d80028e17c")
 
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     compileOnly "org.jetbrains.kotlin:kotlin-reflect"
@@ -72,8 +72,6 @@ dependencies {
 //        testCompileOnly "org.junit.jupiter:junit-jupiter-api:5.3.1"
     testCompile "com.github.nhaarman:mockito-kotlin:2.1.0"
     testCompile 'io.mockk:mockk:1.9'
-
-    compileOnly("com.github.AstrideUG.DarkBedrock:Darkness-Spigot:8ee58575b")
 
 }
 
