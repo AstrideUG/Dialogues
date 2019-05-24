@@ -5,6 +5,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.clip.placeholderapi.PlaceholderAPI
 import net.darkdevelopers.darkbedrock.darkness.spigot.functions.execute
 import net.darkdevelopers.darkbedrock.darkness.spigot.functions.sendTo
 import net.darkdevelopers.darkbedrock.darkness.universal.builder.textcomponent.builder
@@ -89,7 +90,7 @@ suspend fun Option.perform(player: Player, entityUUID: UUID) {
 
     if (player.options.isEmpty()) {
         Bukkit.getScheduler().runTask(JavaPlugin.getProvidingPlugin(Dialogue::class.java)) {
-            Bukkit.getConsoleSender().execute(command.replace("\${player}", player.name))
+            Bukkit.getConsoleSender().execute(command.replaced(player))
         }
         states.getOrPut(player.uniqueId) { mutableMapOf() }[entityUUID] = id
     } else {
@@ -112,3 +113,7 @@ private suspend fun Option.printText(sender: CommandSender): Unit = text.forEach
     if (index == text.size - 1 && actions.isEmpty()) return
     delay(configService.sleepOnTextPrint)
 }
+
+private fun String.replaced(player: Player): String =
+    if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") == null) this
+    else PlaceholderAPI.setPlaceholders(player, this)
