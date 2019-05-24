@@ -27,10 +27,14 @@ class Dialogues : DarkPlugin() {
             ServicePriority.Normal
         ) //Important for ConfigService.instance
 
-        options = configService.loadOptions().toSet().toMutableSet()
+        options = configService.loadOptions()
         dialogues = configService.loadDialogues().map { it.key to it.value.toMutableList() }.toMap().toMutableMap()
         states = configService.loadStates().map { it.key to it.value.toMutableMap() }.toMap().toMutableMap()
 
+
+        logger.info("Loaded options: $options")
+        logger.info("Loaded dialogues: $dialogues")
+        logger.info("Loaded states: $states")
 
         Dialogue(this)
         Speech.setup(this)
@@ -38,6 +42,11 @@ class Dialogues : DarkPlugin() {
 
     override fun onDisable(): Unit = onDisable {
         Speech.reset()
+
+        configService.saveOptions(options)
+        configService.saveDialogues(dialogues)
+        configService.saveStates(states)
+
     }
 
 }

@@ -25,25 +25,27 @@ object Speech : EventsTemplate() {
 
             val entity = event.rightClicked ?: return@listen
             val dialogue = entity.findDialogue(player.uniqueId) ?: return@listen
+            val option = dialogue.start
 
             player.isDialogueRunning = true
-            dialogue.start.perform(player, entity.entityId)
+            player.options = mutableSetOf(option)
+            option.performAsync(player, entity.uniqueId)
 
         }.add()
     }
 
-    private fun Entity.findDialogue(uniqueId: UUID): Dialogue? {
+    private fun Entity.findDialogue(playerUUID: UUID): Dialogue? {
 
-        val dialogues = dialogues[entityId] ?: return null
+        val dialogues = dialogues[uniqueId] ?: return null
         if (dialogues.isEmpty()) return null //entity has no dialogues
 
         return try {
-            val playerDialogues = states.getOrPut(uniqueId) { mutableMapOf() }
-            val lastDialogueID = playerDialogues[entityId] ?: return dialogues.first()
+            val playerDialogues = states.getOrPut(playerUUID) { mutableMapOf() }
+            val lastDialogueID = playerDialogues[uniqueId] ?: return dialogues.first()
             val lastDialogue = dialogues.find { it.id == lastDialogueID }
             if (lastDialogue == null) dialogues.first() else dialogues[dialogues.indexOf(lastDialogue) + 1]
         } catch (ex: IndexOutOfBoundsException) {
-            System.err.println("[Dialogues] tried to use a not existing dialogue on entity with id: $entityId by player $uniqueId")
+            System.err.println("[Dialogues] tried to use a not existing dialogue on entity with id: $entityId by player $playerUUID")
             dialogues.first()
         }
 

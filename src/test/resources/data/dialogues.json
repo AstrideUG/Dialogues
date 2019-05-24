@@ -1,5 +1,5 @@
 {
-  "ENTITY_ID": [
+  "ENTITY_UUID": [
     {
       "id": "First-Dialogue",
       "start": "Option-ID (e.g. \"test-option\")"
