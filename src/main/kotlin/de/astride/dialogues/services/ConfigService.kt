@@ -45,13 +45,14 @@ class ConfigService(private val directory: File) {
     }
 
 
-    fun loadOptions(): MutableOptions = options.toMap().map { it.toOption() }.toMutableSet()
+    fun loadOptions(jsonArray: JsonArray = options): MutableOptions =
+        jsonArray.toMap().map { it.toOption() }.toMutableSet()
 
     fun saveOptions(options: Options, configData: ConfigData = optionsData): Unit =
         GsonService.save(configData, JsonArray(options.map { it.toMap().toJsonObject() }))
 
     @Suppress("UNCHECKED_CAST")
-    fun loadDialogues(): Dialogues = dialogues.toMap().mapNotNull { (key, value) ->
+    fun loadDialogues(jsonObject: JsonObject = dialogues): Dialogues = jsonObject.toMap().mapNotNull { (key, value) ->
         (key.toUUID() to (value as? List<Map<String, Any?>>)?.mapNotNull { it.toDialogue() }).toSecondNotNull()
     }.toMap()
 
@@ -63,7 +64,7 @@ class ConfigService(private val directory: File) {
     }.toMap().toJsonObject())
 
     @Suppress("UNCHECKED_CAST")
-    fun loadStates(): States = states.toMap().mapNotNull { (key, value) ->
+    fun loadStates(jsonObject: JsonObject = states): States = jsonObject.toMap().mapNotNull { (key, value) ->
         (key.toUUID() to (value as? Map<String, Any?>)?.mapNotNull { (key, value) ->
             (key.toUUID() to value?.toString()).toSecondNotNull()
         }?.toMap()).toNotNull()
@@ -74,8 +75,11 @@ class ConfigService(private val directory: File) {
         configData: ConfigData = statesData
     ): Unit = GsonService.save(
         configData, states.map { (key, value) ->
-            key.toString() to value.map { it.toString() to value }.toMap()
-        }.toMap().toJsonObject()
+            val pair = key.toString() to value.map { it.key.toString() to it.value }.toMap()
+            pair
+        }.toMap().apply {
+
+        }.toJsonObject()
     )
 
     private fun String.toConfigData(

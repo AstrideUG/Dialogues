@@ -43,10 +43,10 @@ object Speech : EventsTemplate() {
             val playerDialogues = states.getOrPut(playerUUID) { mutableMapOf() }
             val lastDialogueID = playerDialogues[uniqueId] ?: return dialogues.first()
             val lastDialogue = dialogues.find { it.id == lastDialogueID }
-            if (lastDialogue == null) dialogues.first() else dialogues[dialogues.indexOf(lastDialogue) + 1]
+            if (lastDialogue == null) dialogues.last() else dialogues[dialogues.indexOf(lastDialogue) + 1]
         } catch (ex: IndexOutOfBoundsException) {
             System.err.println("[Dialogues] tried to use a not existing dialogue on entity with id: $entityId by player $playerUUID")
-            dialogues.first()
+            return null
         }
 
     }
