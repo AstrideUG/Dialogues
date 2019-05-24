@@ -72,6 +72,7 @@ fun Option.toMap(): Map<String, Any?> = mapOf(
 @InternalCoroutinesApi
 fun Option.performAsync(player: Player, entityUUID: UUID) {
     GlobalScope.launch { perform(player, entityUUID) }.invokeOnCompletion(onCancelling = true) {
+        if (it == null) if (player.options.isEmpty()) return@invokeOnCompletion
         player.isDialogueRunning = false
     }
 }
@@ -108,6 +109,6 @@ suspend fun Option.perform(player: Player, entityUUID: UUID) {
 
 private suspend fun Option.printText(sender: CommandSender): Unit = text.forEachIndexed { index, line ->
     line.sendTo(sender)
-    if (index == text.size - 1) return
+    if (index == text.size - 1 && actions.isEmpty()) return
     delay(configService.sleepOnTextPrint)
 }
