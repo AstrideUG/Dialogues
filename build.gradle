@@ -56,7 +56,7 @@ configurations {
 
 dependencies {
 
-    compileOnly("com.github.AstrideUG.DarkBedrock:Darkness-Spigot:d80028e17c")
+    compileOnly("com.github.AstrideUG.DarkBedrock:Darkness-Spigot:f923a17")
 
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     compileOnly "org.jetbrains.kotlin:kotlin-reflect"

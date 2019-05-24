@@ -12,7 +12,12 @@ import net.md_5.bungee.api.chat.ClickEvent
 import net.md_5.bungee.api.chat.HoverEvent
 import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
+import org.bukkit.ChatColor.DARK_GRAY
+import org.bukkit.ChatColor.GREEN
+import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
+import org.bukkit.plugin.java.JavaPlugin
+import java.util.*
 
 /**
  * @author Lars Artmann | LartyHD
@@ -54,33 +59,55 @@ fun Map<String, Any?>.toOption(): Option {
 
 /**
  * @author Lars Artmann | LartyHD
- * Created by Lars Artmann | LartyHD on 23.05.2019 05:59.
+ * Created by Lars Artmann | LartyHD on 23.05.2019 22:07.
  * Current Version: 1.0 (23.05.2019 - 23.05.2019)
  */
+fun Option.toMap(): Map<String, Any?> = mapOf(
+    "id" to id,
+    "text" to text,
+    "actions" to actions,
+    "command" to command
+)
+
 @InternalCoroutinesApi
-fun Option.perform(player: Player, entityID: Int) {
-    GlobalScope.launch {
-        text.forEach {
-            it.sendTo(player)
-            delay(configService.sleepOnTextPrint)
-        }
-        if (actions.isEmpty()) {
-            Bukkit.getConsoleSender().execute(command.replace("\${player}", player.name))
-            states.getOrPut(player.uniqueId) { mutableMapOf() }[entityID] += id
-        } else {
-            val textComponent = TextComponent()
-            actions.map { (key, value) ->
-                textComponent.builder()
-                    .setText(key)
-                    .setClickEvent(
-                        ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dialogue use option $entityID $value")
-                    )
-                    .setHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Select a option!"))))
-                    .build()
-            }.forEach { textComponent.addExtra(it) }
-            player.spigot().sendMessage(textComponent)
-        }
-    }.invokeOnCompletion(onCancelling = true) {
+fun Option.performAsync(player: Player, entityUUID: UUID) {
+    GlobalScope.launch { perform(player, entityUUID) }.invokeOnCompletion(onCancelling = true) {
         player.isDialogueRunning = false
     }
+}
+
+/**
+ * @author Lars Artmann | LartyHD
+ * Created by Lars Artmann | LartyHD on 23.05.2019 05:59.
+ * Current Version: 1.0 (23.05.2019 - 24.05.2019)
+ */
+@InternalCoroutinesApi
+suspend fun Option.perform(player: Player, entityUUID: UUID) {
+    player.options = actions.values.mapNotNull { id -> options.find { it.id == id } }.toMutableSet()
+    this.printText(player)
+
+    if (player.options.isEmpty()) {
+        Bukkit.getScheduler().runTask(JavaPlugin.getProvidingPlugin(Dialogue::class.java)) {
+            Bukkit.getConsoleSender().execute(command.replace("\${player}", player.name))
+        }
+        states.getOrPut(player.uniqueId) { mutableMapOf() }[entityUUID] = id
+    } else {
+        val textComponents = mutableListOf<TextComponent>()
+        actions.forEach { (key, value) ->
+            textComponents += TextComponent().builder()
+                .setText("$DARK_GRAY[$GREEN$key$DARK_GRAY] ")
+                .setClickEvent(
+                    ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dialogue use option $entityUUID $value")
+                )
+                .setHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, arrayOf(TextComponent("Select a option!"))))
+                .build()
+        }
+        player.spigot().sendMessage(*textComponents.toTypedArray())
+    }
+}
+
+private suspend fun Option.printText(sender: CommandSender): Unit = text.forEachIndexed { index, line ->
+    line.sendTo(sender)
+    if (index == text.size - 1) return
+    delay(configService.sleepOnTextPrint)
 }
