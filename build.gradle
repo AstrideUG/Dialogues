@@ -57,6 +57,10 @@ configurations {
 dependencies {
 
     compileOnly("com.github.AstrideUG.DarkBedrock:Darkness-Spigot:f923a17")
+    compileOnly("com.github.PlaceholderAPI:PlaceholderAPI:2.10.2") {
+        exclude(module: "bstats-bukkit")
+        exclude(module: "jsonmessage")
+    }
 
     compileOnly "org.jetbrains.kotlin:kotlin-stdlib"
     compileOnly "org.jetbrains.kotlin:kotlin-reflect"
