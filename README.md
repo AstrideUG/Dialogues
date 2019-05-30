@@ -1,4 +1,4 @@
-# Dialogues-for-Citizens
+# Dialogues
 
 Es handelt sich beim Produkt um eine Citizens Erweiterung namens „Dialoges“. 
 Mithilfe dieser Erweiterung soll es möglich sein, interaktive Dialoge mit NPC’s zu führen.
