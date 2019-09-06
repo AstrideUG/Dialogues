@@ -1,15 +1,13 @@
 package de.astride.dialogues
 
 import de.astride.dialogues.commands.Dialogue
-import de.astride.dialogues.data.dialogues
-import de.astride.dialogues.data.options
-import de.astride.dialogues.data.states
 import de.astride.dialogues.events.Speech
 import de.astride.dialogues.functions.configService
 import de.astride.dialogues.services.ConfigService
+import de.astride.dialogues.services.loadConfigs
+import de.astride.dialogues.services.saveConfigs
 import kotlinx.coroutines.InternalCoroutinesApi
 import net.darkdevelopers.darkbedrock.darkness.spigot.plugin.DarkPlugin
-import org.bukkit.plugin.ServicePriority
 
 /**
  * @author Lars Artmann | LartyHD
@@ -20,17 +18,13 @@ class Dialogues : DarkPlugin() {
 
     @InternalCoroutinesApi
     override fun onEnable(): Unit = onEnable {
-        server.servicesManager.register(
-            ConfigService::class.java,
-            ConfigService(dataFolder),
-            this,
-            ServicePriority.Normal
-        ) //Important for ConfigService.instance
 
+        configService = ConfigService(dataFolder) //Important for ConfigService.instance
         loadConfigs()
 
         Dialogue(this)
         Speech.setup(this)
+
     }
 
     override fun onDisable(): Unit = onDisable {
@@ -38,22 +32,5 @@ class Dialogues : DarkPlugin() {
         saveConfigs()
     }
 
-    private fun loadConfigs() {
-        options = configService.loadOptions()
-        logger.info("Loaded options: $options")
-        dialogues = configService.loadDialogues().map { it.key to it.value.toMutableList() }.toMap().toMutableMap()
-        logger.info("Loaded dialogues: $dialogues")
-        states = configService.loadStates().map { it.key to it.value.toMutableMap() }.toMap().toMutableMap()
-        logger.info("Loaded states: $states")
-    }
-
-    private fun saveConfigs() {
-        configService.saveOptions(options)
-        logger.info("Saves options: $options")
-        configService.saveDialogues(dialogues)
-        logger.info("Saves dialogues: $dialogues")
-        configService.saveStates(states)
-        logger.info("Saves states: $states")
-    }
 
 }

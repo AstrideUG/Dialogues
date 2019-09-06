@@ -4,12 +4,13 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonPrimitive
 import de.astride.dialogues.data.*
+import de.astride.dialogues.functions.configService
 import net.darkdevelopers.darkbedrock.darkness.general.configs.ConfigData
 import net.darkdevelopers.darkbedrock.darkness.general.configs.gson.GsonService
 import net.darkdevelopers.darkbedrock.darkness.general.configs.gson.GsonService.loadAs
 import net.darkdevelopers.darkbedrock.darkness.general.functions.toUUID
 import net.darkdevelopers.darkbedrock.darkness.spigot.functions.*
-import org.bukkit.Bukkit
+import org.bukkit.plugin.java.JavaPlugin
 import java.io.File
 import net.darkdevelopers.darkbedrock.darkness.spigot.functions.JsonObject as jsonObjectOf
 
@@ -88,8 +89,22 @@ class ConfigService(private val directory: File) {
         suffix: String = ".json"
     ): ConfigData = ConfigData(directory, "$prefix$this$suffix")
 
-    companion object {
-        val instance: ConfigService get() = Bukkit.getServicesManager()?.getRegistration(ConfigService::class.java)?.provider!!
-    }
+}
 
+fun JavaPlugin.loadConfigs() {
+    options = configService.loadOptions()
+    logger.info("Loaded options: $options")
+    dialogues = configService.loadDialogues().map { it.key to it.value.toMutableList() }.toMap().toMutableMap()
+    logger.info("Loaded dialogues: $dialogues")
+    states = configService.loadStates().map { it.key to it.value.toMutableMap() }.toMap().toMutableMap()
+    logger.info("Loaded states: $states")
+}
+
+fun JavaPlugin.saveConfigs() {
+    configService.saveOptions(options)
+    logger.info("Saves options: $options")
+    configService.saveDialogues(dialogues)
+    logger.info("Saves dialogues: $dialogues")
+    configService.saveStates(states)
+    logger.info("Saves states: $states")
 }

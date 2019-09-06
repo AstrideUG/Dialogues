@@ -1,6 +1,7 @@
 package de.astride.dialogues.data
 
 import de.astride.dialogues.functions.configService
+import de.astride.dialogues.functions.javaPlugin
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -17,13 +18,11 @@ import org.bukkit.ChatColor.DARK_GRAY
 import org.bukkit.ChatColor.GREEN
 import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
-import org.bukkit.plugin.java.JavaPlugin
 import java.util.*
 
 /**
  * @author Lars Artmann | LartyHD
- * Created by Lars Artmann | LartyHD on 08.05.2019 00:43.
- * Current Version: 1.0 (08.05.2019 - 23.05.2019)
+ * Created on 08.05.2019 00:43.
  */
 interface Option {
     val id: String
@@ -34,8 +33,7 @@ interface Option {
 
 /**
  * @author Lars Artmann | LartyHD
- * Created by Lars Artmann | LartyHD on 23.05.2019 18:45.
- * Current Version: 1.0 (23.05.2019 - 23.05.2019)
+ * Created on 23.05.2019 18:45.
  */
 data class DataOption(
     override val id: String,
@@ -44,11 +42,6 @@ data class DataOption(
     override val command: String = ""
 ) : Option
 
-/**
- * @author Lars Artmann | LartyHD
- * Created by Lars Artmann | LartyHD on 23.05.2019 19:25.
- * Current Version: 1.0 (23.05.2019 - 23.05.2019)
- */
 @Suppress("UNCHECKED_CAST")
 fun Map<String, Any?>.toOption(): Option {
     val id = this["id"].toString()
@@ -58,11 +51,6 @@ fun Map<String, Any?>.toOption(): Option {
     return DataOption(id, text, actions, command)
 }
 
-/**
- * @author Lars Artmann | LartyHD
- * Created by Lars Artmann | LartyHD on 23.05.2019 22:07.
- * Current Version: 1.0 (23.05.2019 - 23.05.2019)
- */
 fun Option.toMap(): Map<String, Any?> = mapOf(
     "id" to id,
     "text" to text,
@@ -78,19 +66,17 @@ fun Option.performAsync(player: Player, entityUUID: UUID) {
     }
 }
 
-/**
- * @author Lars Artmann | LartyHD
- * Created by Lars Artmann | LartyHD on 23.05.2019 05:59.
- * Current Version: 1.0 (23.05.2019 - 24.05.2019)
- */
 @InternalCoroutinesApi
 suspend fun Option.perform(player: Player, entityUUID: UUID) {
     player.options = actions.values.mapNotNull { id -> options.find { it.id == id } }.toMutableSet()
     this.printText(player)
 
+    println("${player.name} has ${options.size} options")
+
     if (player.options.isEmpty()) {
-        Bukkit.getScheduler().runTask(JavaPlugin.getProvidingPlugin(Dialogue::class.java)) {
+        Bukkit.getScheduler().runTask(javaPlugin) {
             Bukkit.getConsoleSender().execute(command.replaced(player))
+            println("Executed ${command.replaced(player)} command")
         }
         states.getOrPut(player.uniqueId) { mutableMapOf() }[entityUUID] = id
     } else {
