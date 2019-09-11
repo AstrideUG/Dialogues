@@ -16,7 +16,6 @@ import net.md_5.bungee.api.chat.TextComponent
 import org.bukkit.Bukkit
 import org.bukkit.ChatColor.DARK_GRAY
 import org.bukkit.ChatColor.GREEN
-import org.bukkit.command.CommandSender
 import org.bukkit.entity.Player
 import java.util.*
 
@@ -71,12 +70,9 @@ suspend fun Option.perform(player: Player, entityUUID: UUID) {
     player.options = actions.values.mapNotNull { id -> options.find { it.id == id } }.toMutableSet()
     this.printText(player)
 
-    println("${player.name} has ${options.size} options")
-
     if (player.options.isEmpty()) {
         Bukkit.getScheduler().runTask(javaPlugin) {
             Bukkit.getConsoleSender().execute(command.replaced(player))
-            println("Executed ${command.replaced(player)} command")
         }
         states.getOrPut(player.uniqueId) { mutableMapOf() }[entityUUID] = id
     } else {
@@ -94,8 +90,8 @@ suspend fun Option.perform(player: Player, entityUUID: UUID) {
     }
 }
 
-private suspend fun Option.printText(sender: CommandSender): Unit = text.forEachIndexed { index, line ->
-    line.sendTo(sender)
+private suspend fun Option.printText(player: Player): Unit = text.forEachIndexed { index, line ->
+    line.replaced(player).sendTo(player)
     if (index == text.size - 1 && actions.isEmpty()) return
     delay(configService.sleepOnTextPrint)
 }
