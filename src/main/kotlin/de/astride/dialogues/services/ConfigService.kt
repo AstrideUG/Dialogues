@@ -17,8 +17,7 @@ import net.darkdevelopers.darkbedrock.darkness.spigot.functions.JsonObject as js
 
 /**
  * @author Lars Artmann | LartyHD
- * Created by Lars Artmann | LartyHD on 23.05.2019 04:51.
- * Last edit 24.05.2019
+ * Created on 23.05.2019 04:51.
  */
 class ConfigService(private val directory: File) {
 
@@ -28,7 +27,7 @@ class ConfigService(private val directory: File) {
     private val config: JsonObject = loadAs(configData) ?: JsonObject()
 
     private val optionsData: ConfigData = "options".toConfigData(dataDirectory)
-    private val options: JsonArray = loadAs(optionsData) ?: JsonArray()
+    private val options: Array<File> = (dataDirectory.resolve("options").listFiles() ?: emptyArray()) + optionsData.file
 
     private val dialoguesData: ConfigData = "dialogues".toConfigData(dataDirectory)
     private val dialogues: JsonObject = loadAs(dialoguesData) ?: JsonObject()
@@ -45,9 +44,9 @@ class ConfigService(private val directory: File) {
         )
     }
 
-
-    fun loadOptions(jsonArray: JsonArray = options): MutableOptions =
-        jsonArray.toMap().map { it.toOption() }.toMutableSet()
+    fun loadOptions(): MutableOptions = options.filter {
+        it.isFile && it.endsWith(".json")
+    }.map { loadAs(it) ?: JsonArray() }.toMap().map { it.toOption() }.toMutableSet()
 
     fun saveOptions(options: Options, configData: ConfigData = optionsData): Unit =
         GsonService.save(configData, JsonArray(options.map { it.toMap().toJsonObject() }))
