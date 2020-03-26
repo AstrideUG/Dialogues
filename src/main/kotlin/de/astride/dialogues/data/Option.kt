@@ -79,7 +79,7 @@ suspend fun Option.perform(player: Player, entityUUID: UUID) {
         val textComponents = mutableListOf<TextComponent>()
         actions.forEach { (key, value) ->
             textComponents += TextComponent().builder()
-                .setText("$DARK_GRAY[$GREEN$key$DARK_GRAY] ")
+                .setText("$DARK_GRAY[$GREEN${key.toList().joinToString("$GREEN")}$DARK_GRAY] ")
                 .setClickEvent(
                     ClickEvent(ClickEvent.Action.RUN_COMMAND, "/dialogue use option $entityUUID $value")
                 )
