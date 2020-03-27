@@ -45,8 +45,8 @@ class ConfigService(private val directory: File) {
     }
 
     fun loadOptions(): MutableOptions = options.filter {
-        it.isFile && it.endsWith(".json")
-    }.map { loadAs(it) ?: JsonArray() }.toMap().map { it.toOption() }.toMutableSet()
+        it.isFile && it.name.endsWith(".json")
+    }.map { (loadAs(it) ?: JsonArray()).toMap() }.flatMap { it.map { option -> option.toOption() } }.toMutableSet()
 
     fun saveOptions(options: Options, configData: ConfigData = optionsData): Unit =
         GsonService.save(configData, JsonArray(options.map { it.toMap().toJsonObject() }))
