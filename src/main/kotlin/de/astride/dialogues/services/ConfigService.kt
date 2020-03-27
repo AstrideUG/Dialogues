@@ -52,9 +52,9 @@ class ConfigService(private val directory: File) {
         GsonService.save(configData, JsonArray(options.map { it.toMap().toJsonObject() }))
 
     @Suppress("UNCHECKED_CAST")
-    fun loadDialogues(jsonObject: JsonObject = dialogues): Dialogues = jsonObject.toMap().mapNotNull { (key, value) ->
-        (key.toUUID() to (value as? List<Map<String, Any?>>)?.mapNotNull { it.toDialogue() }).toSecondNotNull()
-    }.toMap()
+    fun loadDialogues(jsonObject: JsonObject = dialogues) = jsonObject.toMap().mapNotNull { (key, value) ->
+        (key.toUUID() to (value as? List<Map<String, Any?>>)?.mapNotNull { it.toDialogue() }?.toMutableList()).toSecondNotNull()
+    }.toMap().toMutableMap()
 
     fun saveDialogues(
         dialogues: Dialogues,
@@ -64,11 +64,11 @@ class ConfigService(private val directory: File) {
     }.toMap().toJsonObject())
 
     @Suppress("UNCHECKED_CAST")
-    fun loadStates(jsonObject: JsonObject = states): States = jsonObject.toMap().mapNotNull { (key, value) ->
+    fun loadStates(jsonObject: JsonObject = states) = jsonObject.toMap().mapNotNull { (key, value) ->
         (key.toUUID() to (value as? Map<String, Any?>)?.mapNotNull { (key, value) ->
             (key.toUUID() to value?.toString()).toSecondNotNull()
-        }?.toMap()).toNotNull()
-    }.toMap()
+        }?.toMap()?.toMutableMap()).toNotNull()
+    }.toMap().toMutableMap()
 
     fun saveStates(
         states: States,
@@ -77,9 +77,7 @@ class ConfigService(private val directory: File) {
         configData, states.map { (key, value) ->
             val pair = key.toString() to value.map { it.key.toString() to it.value }.toMap()
             pair
-        }.toMap().apply {
-
-        }.toJsonObject()
+        }.toMap().toJsonObject()
     )
 
     private fun String.toConfigData(
@@ -93,9 +91,9 @@ class ConfigService(private val directory: File) {
 fun JavaPlugin.loadConfigs() {
     options = configService.loadOptions()
     logger.info("Loaded options: $options")
-    dialogues = configService.loadDialogues().map { it.key to it.value.toMutableList() }.toMap().toMutableMap()
+    dialogues = configService.loadDialogues()
     logger.info("Loaded dialogues: $dialogues")
-    states = configService.loadStates().map { it.key to it.value.toMutableMap() }.toMap().toMutableMap()
+    states = configService.loadStates()
     logger.info("Loaded states: $states")
 }
 
